@@ -34,7 +34,7 @@ mod slave;
 mod slave_req_handler;
 
 pub use master::{Master, UserMemoryContext, VhostUserMaster};
-pub use slave::{Slave, SlaveListener, VhostUserSlave};
+pub use slave::{Slave, SlaveListener, VhostUserMasterReqHandler};
 pub use slave_req_handler::{SlaveReqHandler, VhostUserSlaveReqHandler};
 
 #[derive(Debug)]
@@ -89,7 +89,7 @@ mod tests {
         let _ = fs::remove_file(path);
     }
 
-    fn create_slave<S: VhostUserSlave>(path: &str, backend: Arc<Mutex<S>>) -> (Master, Slave<S>) {
+    fn create_slave<S: VhostUserMasterReqHandler>(path: &str, backend: Arc<Mutex<S>>) -> (Master, Slave<S>) {
         remove_temp_file(path);
         let mut slave_listener = SlaveListener::new(path, backend).unwrap();
         let master = Master::new(path).unwrap();

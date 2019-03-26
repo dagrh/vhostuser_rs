@@ -31,7 +31,7 @@ impl DummySlave {
     }
 }
 
-impl VhostUserSlave for DummySlave {
+impl VhostUserMasterReqHandler for DummySlave {
     fn set_owner(&mut self) -> Result<()> {
         if self.owned {
             return Err(Error::InvalidOperation);

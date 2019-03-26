@@ -10,7 +10,9 @@ use super::connection::{Endpoint, Listener};
 use super::message::*;
 use super::{Error, Result};
 
-pub trait VhostUserSlave {
+// trait that gets fed de-serialised requests sent
+// from the VMM over the master channel to the slave.
+pub trait VhostUserMasterReqHandler {
     fn set_owner(&mut self) -> Result<()>;
     fn reset_owner(&mut self) -> Result<()>;
     fn get_features(&mut self) -> Result<u64>;
@@ -48,14 +50,14 @@ pub trait VhostUserSlave {
     fn set_config(&mut self, offset: u32, buf: &[u8], flags: VhostUserConfigFlags) -> Result<()>;
 }
 
-pub struct SlaveListener<S: VhostUserSlave> {
+pub struct SlaveListener<S: VhostUserMasterReqHandler> {
     listener: Listener,
     backend: Option<Arc<Mutex<S>>>,
 }
 
 /// Sets up a listener for incoming master connections, and handles construction
 /// of a Slave on success.
-impl<S: VhostUserSlave> SlaveListener<S> {
+impl<S: VhostUserMasterReqHandler> SlaveListener<S> {
     /// Create a unix domain socket for incoming master connections.
     pub fn new(path: &str, backend: Arc<Mutex<S>>) -> Result<Self> {
         Ok(SlaveListener {
@@ -82,7 +84,7 @@ impl<S: VhostUserSlave> SlaveListener<S> {
 
 /// A vhost-user slave endpoint which relays all received requests from the
 /// master to the virtio backend device object.
-pub struct Slave<S: VhostUserSlave> {
+pub struct Slave<S: VhostUserMasterReqHandler> {
     // underlying Unix domain socket for communication
     fd: Endpoint<MasterReq>,
     // the VirtIO backend device object
@@ -99,7 +101,7 @@ pub struct Slave<S: VhostUserSlave> {
     failed: bool,
 }
 
-impl<S: VhostUserSlave> Slave<S> {
+impl<S: VhostUserMasterReqHandler> Slave<S> {
     /// Create a vhost-user slave endpoint.
     fn new(fd: Endpoint<MasterReq>, backend: Arc<Mutex<S>>) -> Self {
         Slave {
@@ -593,7 +595,7 @@ impl<S: VhostUserSlave> Slave<S> {
     }
 }
 
-impl<S: VhostUserSlave> AsRawFd for Slave<S> {
+impl<S: VhostUserMasterReqHandler> AsRawFd for Slave<S> {
     fn as_raw_fd(&self) -> RawFd {
         self.fd.as_raw_fd()
     }

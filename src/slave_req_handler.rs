@@ -10,6 +10,8 @@ use super::connection::Endpoint;
 use super::message::*;
 use super::{Error, HandlerResult, Result};
 
+// trait that gets fed de-serialised requests sent
+// from the slave over the slave channel to the VMM.
 pub trait VhostUserSlaveReqHandler {
     // fn handle_iotlb_msg(&mut self, iotlb: VhostUserIotlb);
     // fn handle_vring_host_notifier(&mut self, area: VhostUserVringArea, fd: RawFd);
