@@ -301,7 +301,7 @@ impl VhostUserMsgValidator for VhostUserMemory {
 }
 
 #[repr(packed)]
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub struct VhostUserMemoryRegion {
     pub guest_phys_addr: u64,
     pub memory_size: u64,
